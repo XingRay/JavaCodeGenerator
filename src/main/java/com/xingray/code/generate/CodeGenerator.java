@@ -216,7 +216,7 @@ public class CodeGenerator {
 
         JVariable sourceVariable = new JVariable();
         sourceVariable.setType(source);
-        String sourceName = Util.firstLowCase(source.getName());
+        String sourceName = Util.firstLowCase(Util.getTypeName(source.getName()));
         sourceVariable.setName(sourceName);
         method.addParam(sourceVariable);
         existNames.add(sourceName);
@@ -231,9 +231,17 @@ public class CodeGenerator {
 
         if (fields != null) {
             for (JField field : fields) {
+                // target.setXxx(source.getXxx());
                 method.addStatement(generateVariableInvokeMethodStatement(field, sourceVariable, targetVariable));
             }
         }
+
+        // return target;
+        ReturnStatement returnStatement = new ReturnStatement();
+        VariableExpression variableExpression = new VariableExpression();
+        variableExpression.setVariable(targetVariable);
+        returnStatement.setExpression(variableExpression);
+        method.addStatement(returnStatement);
 
         return method;
     }
