@@ -1,12 +1,11 @@
-package com.xingray.code.generate;
+package com.xingray.code.java.generate;
 
-import com.xingray.code.*;
-import com.xingray.code.expressions.EmptyLineStatement;
-import com.xingray.code.expressions.TwoExpression;
-import com.xingray.code.expressions.ValueExpression;
-import com.xingray.code.expressions.VariableExpression;
-import com.xingray.code.statements.*;
-import com.xingray.code.util.Util;
+import com.xingray.code.java.expressions.EmptyLineStatement;
+import com.xingray.code.java.expressions.TwoExpression;
+import com.xingray.code.java.expressions.ValueExpression;
+import com.xingray.code.java.expressions.VariableExpression;
+import com.xingray.code.java.*;
+import com.xingray.code.java.statements.*;
 import com.xingray.util.NumberUtil;
 import com.xingray.util.ReflectUtil;
 import com.xingray.util.StringUtil;
@@ -15,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class CodeGenerator {
+public class JavaCodeGenerator {
 
     public static List<JField> getFields(String fieldListText) {
         if (StringUtil.isEmpty(fieldListText)) {
@@ -53,21 +52,21 @@ public class CodeGenerator {
             words.add(s);
         }
 
-        if (words.remove(CodeConstants.PRIVATE)) {
+        if (words.remove(JavaCodeConstants.PRIVATE)) {
             field.setAccessible(JAccessible.PRIVATE);
-        } else if (words.remove(CodeConstants.PUBLIC)) {
+        } else if (words.remove(JavaCodeConstants.PUBLIC)) {
             field.setAccessible(JAccessible.PUBLIC);
-        } else if (words.remove(CodeConstants.PROTECTED)) {
+        } else if (words.remove(JavaCodeConstants.PROTECTED)) {
             field.setAccessible(JAccessible.PROTECTED);
         } else {
             field.setAccessible(JAccessible.PACKAGE);
         }
 
-        if (words.remove(CodeConstants.STATIC)) {
+        if (words.remove(JavaCodeConstants.STATIC)) {
             field.setStatic(true);
         }
 
-        if (words.remove(CodeConstants.FINAL)) {
+        if (words.remove(JavaCodeConstants.FINAL)) {
             field.setFinal(true);
         }
 
@@ -88,7 +87,7 @@ public class CodeGenerator {
         String typeName = filed.getType().getName();
         if (typeName.equals("Boolean")) {
             type = Boolean.class;
-        } else if (typeName.equals(CodeConstants.BOOLEAN)) {
+        } else if (typeName.equals(JavaCodeConstants.BOOLEAN)) {
             type = boolean.class;
         } else {
             type = Object.class;
@@ -143,21 +142,21 @@ public class CodeGenerator {
         String fieldValue = line.substring(index + 1).trim();
         JClass javaClass = new JClass();
         if (fieldValue.startsWith("\"") && fieldValue.endsWith("\"")) {
-            javaClass.setName(CodeConstants.STRING);
-        } else if (fieldValue.equals(CodeConstants.TRUE) || fieldValue.equals(CodeConstants.FALSE)) {
-            javaClass.setName(CodeConstants.BOOLEAN);
+            javaClass.setName(JavaCodeConstants.STRING);
+        } else if (fieldValue.equals(JavaCodeConstants.TRUE) || fieldValue.equals(JavaCodeConstants.FALSE)) {
+            javaClass.setName(JavaCodeConstants.BOOLEAN);
         } else if (fieldValue.contains(".")) {
-            javaClass.setName(CodeConstants.DOUBLE);
+            javaClass.setName(JavaCodeConstants.DOUBLE);
         } else {
             Long longValue = NumberUtil.toLong(fieldValue);
             if (longValue != null) {
                 if (longValue < 100) {
-                    javaClass.setName(CodeConstants.INT);
+                    javaClass.setName(JavaCodeConstants.INT);
                 } else {
-                    javaClass.setName(CodeConstants.LONG);
+                    javaClass.setName(JavaCodeConstants.LONG);
                 }
             } else {
-                javaClass.setName(CodeConstants.OBJECT);
+                javaClass.setName(JavaCodeConstants.OBJECT);
             }
         }
         field.setType(javaClass);
@@ -179,23 +178,23 @@ public class CodeGenerator {
     public static String toCode(JField field) {
         String s = "";
         switch (field.getAccessible()) {
-            case PRIVATE -> s += CodeConstants.PRIVATE;
-            case PUBLIC -> s += CodeConstants.PUBLIC;
-            case PROTECTED -> s += CodeConstants.PROTECTED;
+            case PRIVATE -> s += JavaCodeConstants.PRIVATE;
+            case PUBLIC -> s += JavaCodeConstants.PUBLIC;
+            case PROTECTED -> s += JavaCodeConstants.PROTECTED;
         }
 
         if (field.isStatic()) {
             if (!s.isBlank()) {
                 s += " ";
             }
-            s += CodeConstants.STATIC;
+            s += JavaCodeConstants.STATIC;
         }
 
         if (field.isFinal()) {
             if (!s.isBlank()) {
                 s += " ";
             }
-            s += CodeConstants.FINAL;
+            s += JavaCodeConstants.FINAL;
         }
 
         if (!s.isBlank()) {
@@ -254,7 +253,7 @@ public class CodeGenerator {
         String typeName = filed.getType().getName();
         if (typeName.equals("Boolean")) {
             type = Boolean.class;
-        } else if (typeName.equals(CodeConstants.BOOLEAN)) {
+        } else if (typeName.equals(JavaCodeConstants.BOOLEAN)) {
             type = boolean.class;
         } else {
             type = Object.class;
@@ -300,14 +299,14 @@ public class CodeGenerator {
             if (!code.isBlank()) {
                 code += " ";
             }
-            code += CodeConstants.STATIC;
+            code += JavaCodeConstants.STATIC;
         }
 
         if (method.isFinal()) {
             if (!code.isBlank()) {
                 code += " ";
             }
-            code += CodeConstants.FINAL;
+            code += JavaCodeConstants.FINAL;
         }
 
         if (!code.isBlank()) {
@@ -329,9 +328,9 @@ public class CodeGenerator {
 
     public static String toCode(JAccessible accessible) {
         return switch (accessible) {
-            case PUBLIC -> CodeConstants.PUBLIC;
-            case PRIVATE -> CodeConstants.PRIVATE;
-            case PROTECTED -> CodeConstants.PROTECTED;
+            case PUBLIC -> JavaCodeConstants.PUBLIC;
+            case PRIVATE -> JavaCodeConstants.PRIVATE;
+            case PROTECTED -> JavaCodeConstants.PROTECTED;
             default -> "";
         };
     }
@@ -403,7 +402,7 @@ public class CodeGenerator {
         condition.setLeftExpression(leftExpression);
         condition.setOperator(JOperator.EQUALS);
         ValueExpression rightExpression = new ValueExpression();
-        rightExpression.setValue(CodeConstants.NULL);
+        rightExpression.setValue(JavaCodeConstants.NULL);
         condition.setRightExpression(rightExpression);
         // if(sourceList==null)
         ifStatement.setConditionalExpression(condition);
@@ -428,7 +427,7 @@ public class CodeGenerator {
         newVariableStatement.setVariable(targetList);
 
         JMethod targetListConstructor = new JMethod();
-        targetListConstructor.setName(CodeConstants.NEW + " ArrayList<>");
+        targetListConstructor.setName(JavaCodeConstants.NEW + " ArrayList<>");
         newVariableStatement.setMethod(targetListConstructor);
 
         // optionList.size()
